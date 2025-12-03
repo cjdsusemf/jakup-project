@@ -83,13 +83,17 @@ const createSite = async (req, res) => {
       });
     }
 
+    // 날짜 필드 처리: "Invalid date" 또는 빈 문자열을 null로 변환
+    const validStartDate = startDate && startDate !== 'Invalid date' && startDate.trim() !== '' ? startDate : null;
+    const validEndDate = endDate && endDate !== 'Invalid date' && endDate.trim() !== '' ? endDate : null;
+
     const site = await Site.create({
       name,
       address,
       managerId,
       companyId,  // 기업 ID 추가
-      startDate,
-      endDate,
+      startDate: validStartDate,
+      endDate: validEndDate,
       status: 'active'
     });
 
@@ -124,12 +128,16 @@ const updateSite = async (req, res) => {
       });
     }
 
+    // 날짜 필드 처리: "Invalid date" 또는 빈 문자열을 null로 변환
+    const validStartDate = startDate && startDate !== 'Invalid date' && startDate.trim() !== '' ? startDate : site.startDate;
+    const validEndDate = endDate && endDate !== 'Invalid date' && endDate.trim() !== '' ? endDate : site.endDate;
+
     await site.update({
       name: name || site.name,
       address: address || site.address,
       status: status || site.status,
-      startDate: startDate || site.startDate,
-      endDate: endDate || site.endDate
+      startDate: validStartDate,
+      endDate: validEndDate
     });
 
     res.status(200).json({
