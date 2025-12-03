@@ -11,13 +11,17 @@ import { useSiteStore } from '../../store/siteStore';
 import { StyledTextarea } from '../../components/common/StyledInput';
 
 // 공수 포맷팅: 정수면 정수로, 소수면 소수로 (예: 2.0 → 2, 2.5 → 2.5)
-const formatEffort = (effort: number): string => {
-  return effort % 1 === 0 ? effort.toString() : effort.toFixed(1).replace(/\.0$/, '');
+const formatEffort = (effort: number | string | undefined | null): string => {
+  const num = typeof effort === 'string' ? parseFloat(effort) : (effort || 0);
+  if (isNaN(num)) return '0';
+  return num % 1 === 0 ? num.toString() : num.toFixed(1).replace(/\.0$/, '');
 };
 
 // 금액 포맷팅: 정수로 변환 후 천 단위 구분 (예: 250000.00 → 250,000)
-const formatAmount = (amount: number): string => {
-  return Math.round(amount).toLocaleString();
+const formatAmount = (amount: number | string | undefined | null): string => {
+  const num = typeof amount === 'string' ? parseFloat(amount) : (amount || 0);
+  if (isNaN(num)) return '0';
+  return Math.round(num).toLocaleString();
 };
 
 interface WorkLog {
