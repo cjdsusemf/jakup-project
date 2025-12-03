@@ -35,8 +35,8 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 정적 파일 서빙 (업로드된 파일 접근 가능하도록)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Vercel 서버리스 환경에서는 파일 시스템 사용 불가
+// 파일은 Supabase Storage를 통해 제공됨
 
 // 라우터 등록
 app.use('/api/auth', authRoutes);
@@ -119,16 +119,32 @@ const syncOptions = process.env.NODE_ENV === 'production'
   ? { alter: false }  // 프로덕션에서는 자동 동기화 비활성화
   : { alter: true };  // 개발 환경에서는 스키마 자동 업데이트
 
-sequelize.sync(syncOptions)
-  .then(() => {
-    logger.info('Database synchronized');
-    app.listen(PORT, () => {
-      logger.info(`Server is running on port ${PORT}`);
-      logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+// Vercel 서버리스 환경에서는 앱을 export
+if (process.env.VERCEL) {
+  // Vercel 환경: 데이터베이스 동기화만 수행
+  sequelize.sync(syncOptions)
+    .then(() => {
+      logger.info('Database synchronized for Vercel deployment');
+    })
+    .catch(err => {
+      logger.error('Failed to sync database:', err);
     });
-  })
-  .catch(err => {
-    logger.error('Failed to sync database:', err);
-    process.exit(1);
-  });
+  
+  // Vercel Serverless Function으로 export
+  module.exports = app;
+} else {
+  // 로컬 개발 환경: 일반 서버 실행
+  sequelize.sync(syncOptions)
+    .then(() => {
+      logger.info('Database synchronized');
+      app.listen(PORT, () => {
+        logger.info(`Server is running on port ${PORT}`);
+        logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      });
+    })
+    .catch(err => {
+      logger.error('Failed to sync database:', err);
+      process.exit(1);
+    });
+}
 

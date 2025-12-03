@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+// 환경 변수에서 API URL 가져오기
+// 개발 환경: http://localhost:3001/api
+// 프로덕션 환경: Vercel 배포 URL/api
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+
 const axiosInstance = axios.create({
-  baseURL: 'https://jakup-project.onrender.com/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

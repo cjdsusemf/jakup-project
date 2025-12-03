@@ -1,0 +1,25 @@
+{
+  "name": "jakup-project",
+  "version": "1.0.0",
+  "description": "JAKUP 건설 현장 관리 시스템",
+  "main": "server/index.js",
+  "scripts": {
+    "install-all": "cd server && npm install && cd ../client && npm install",
+    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm start\"",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start",
+    "vercel-build": "cd server && npm install && cd ../client && npm install && npm run build"
+  },
+  "keywords": [
+    "construction",
+    "management",
+    "supabase",
+    "vercel"
+  ],
+  "author": "JAKUP Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+

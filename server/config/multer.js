@@ -1,26 +1,8 @@
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 
-// uploads 디렉토리가 없으면 생성
-const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// 파일 저장 설정
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    // 파일명 중복 방지를 위해 타임스탬프 추가
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    const basename = path.basename(file.originalname, ext);
-    cb(null, basename + '-' + uniqueSuffix + ext);
-  }
-});
+// Vercel 서버리스 환경에서는 파일 시스템을 사용할 수 없으므로 메모리 스토리지 사용
+// 파일은 Supabase Storage로 업로드됨
+const storage = multer.memoryStorage();
 
 // 파일 필터 (선택적)
 const fileFilter = (req, file, cb) => {
@@ -48,7 +30,7 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// multer 설정
+// multer 설정 - 메모리 스토리지 사용 (Vercel Serverless 호환)
 const upload = multer({
   storage: storage,
   limits: {

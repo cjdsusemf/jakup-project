@@ -1,24 +1,39 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
-const path = require('path');
 
-// SQLite 설정 (개발/테스트 환경용)
-// 프로덕션 환경에서는 PostgreSQL로 변경하세요
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: path.join(__dirname, '../database.sqlite'),
-  logging: false
+// Supabase PostgreSQL 설정
+const sequelize = new Sequelize(process.env.DATABASE_URL || '', {
+  dialect: 'postgres',
+  dialectOptions: {
+    ssl: process.env.NODE_ENV === 'production' 
+      ? {
+          require: true,
+          rejectUnauthorized: false
+        }
+      : false
+  },
+  logging: process.env.NODE_ENV === 'development' ? console.log : false,
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
+  }
 });
 
 // 데이터베이스 연결 테스트
-sequelize.authenticate()
-  .then(() => {
-    console.log('Database connection has been established successfully.');
-    console.log('Using SQLite database at:', path.join(__dirname, '../database.sqlite'));
-  })
-  .catch(err => {
-    console.error('Unable to connect to the database:', err);
-  });
+if (process.env.DATABASE_URL) {
+  sequelize.authenticate()
+    .then(() => {
+      console.log('✅ Supabase PostgreSQL connection established successfully.');
+    })
+    .catch(err => {
+      console.error('❌ Unable to connect to the database:', err);
+      // Vercel 서버리스 환경에서는 바로 에러를 throw하지 않음
+    });
+} else {
+  console.warn('⚠️  DATABASE_URL not set. Please configure Supabase connection string.');
+}
 
 module.exports = sequelize;
 

@@ -1,10 +1,9 @@
 const Attachment = require('../models/Attachment');
 const Task = require('../models/Task');
 const User = require('../models/User');
-const path = require('path');
-const fs = require('fs').promises;
+const { uploadToSupabase, deleteFromSupabase } = require('../config/supabase');
 
-// 첨부파일 업로드
+// 첨부파일 업로드 (Supabase Storage 사용)
 exports.uploadAttachment = async (req, res) => {
   try {
     const { taskId } = req.params;
@@ -21,10 +20,18 @@ exports.uploadAttachment = async (req, res) => {
       return res.status(400).json({ message: '파일이 업로드되지 않았습니다.' });
     }
 
+    // Supabase Storage에 업로드
+    const { path: filePath, url: fileUrl } = await uploadToSupabase(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype
+    );
+
     const attachment = await Attachment.create({
-      filename: req.file.filename,
+      filename: req.file.originalname,
       originalName: req.file.originalname,
-      filePath: req.file.path,
+      filePath: filePath,
+      fileUrl: fileUrl,
       fileSize: req.file.size,
       mimeType: req.file.mimetype,
       TaskId: taskId,
@@ -36,7 +43,7 @@ exports.uploadAttachment = async (req, res) => {
       include: [
         {
           model: User,
-          attributes: ['id', 'username', 'name', 'role']
+          attributes: ['id', 'name', 'role']
         }
       ]
     });
@@ -44,7 +51,10 @@ exports.uploadAttachment = async (req, res) => {
     res.status(201).json(attachmentWithUser);
   } catch (error) {
     console.error('첨부파일 업로드 오류:', error);
-    res.status(500).json({ message: '첨부파일 업로드에 실패했습니다.' });
+    res.status(500).json({ 
+      message: '첨부파일 업로드에 실패했습니다.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
@@ -71,7 +81,7 @@ exports.getAttachmentsByTask = async (req, res) => {
   }
 };
 
-// 첨부파일 삭제
+// 첨부파일 삭제 (Supabase Storage에서 삭제)
 exports.deleteAttachment = async (req, res) => {
   try {
     const { taskId, attachmentId } = req.params;
@@ -90,15 +100,15 @@ exports.deleteAttachment = async (req, res) => {
     }
 
     // 본인이 업로드한 파일이거나 관리자인 경우만 삭제 가능
-    if (attachment.UserId !== userId && userRole !== 'admin') {
+    if (attachment.UserId !== userId && userRole !== 'manager') {
       return res.status(403).json({ message: '첨부파일을 삭제할 권한이 없습니다.' });
     }
 
-    // 실제 파일 삭제
+    // Supabase Storage에서 파일 삭제
     try {
-      await fs.unlink(attachment.filePath);
+      await deleteFromSupabase(attachment.filePath);
     } catch (fileError) {
-      console.error('파일 삭제 오류:', fileError);
+      console.error('Supabase 파일 삭제 오류:', fileError);
       // 파일이 이미 없어도 DB 레코드는 삭제
     }
 
@@ -110,7 +120,7 @@ exports.deleteAttachment = async (req, res) => {
   }
 };
 
-// 첨부파일 다운로드
+// 첨부파일 다운로드 (Supabase Storage URL로 리다이렉트)
 exports.downloadAttachment = async (req, res) => {
   try {
     const { taskId, attachmentId } = req.params;
@@ -126,8 +136,12 @@ exports.downloadAttachment = async (req, res) => {
       return res.status(404).json({ message: '첨부파일을 찾을 수 없습니다.' });
     }
 
-    // 파일 다운로드
-    res.download(attachment.filePath, attachment.originalName);
+    // Supabase Storage URL로 리다이렉트
+    if (attachment.fileUrl) {
+      res.redirect(attachment.fileUrl);
+    } else {
+      res.status(404).json({ message: '파일 URL을 찾을 수 없습니다.' });
+    }
   } catch (error) {
     console.error('첨부파일 다운로드 오류:', error);
     res.status(500).json({ message: '첨부파일 다운로드에 실패했습니다.' });

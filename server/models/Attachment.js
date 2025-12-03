@@ -17,7 +17,13 @@ const Attachment = sequelize.define('Attachment', {
   },
   filePath: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    comment: 'Supabase Storage 경로'
+  },
+  fileUrl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: 'Supabase Storage 공개 URL'
   },
   fileSize: {
     type: DataTypes.INTEGER,

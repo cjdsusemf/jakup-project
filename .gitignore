@@ -1,58 +1,55 @@
-# 환경 변수 파일 (절대 커밋 금지!)
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Environment variables
 .env
 .env.local
-.env.production
-.env.*.local
-**/.env
-**/.env.local
-**/.env.production
+.env.production.local
+.env.development.local
+.env.test.local
 
-# 데이터베이스
-*.sqlite
-*.sqlite.backup*
-*.db
+# Build outputs
+client/build/
+client/.next/
+dist/
+out/
 
-# 로그
+# Logs
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# 의존성
-node_modules/
-**/node_modules/
+# Database
+*.sqlite
+*.sqlite-journal
+*.db
 
-# 빌드 결과물
-build/
-dist/
-*.tsbuildinfo
+# Uploads (파일은 Supabase Storage 사용)
+server/uploads/
 
-# 업로드 파일 (선택사항 - 운영 환경에서는 클라우드 스토리지 사용 권장)
-uploads/
-**/uploads/
+# OS
+.DS_Store
+Thumbs.db
 
-# IDE 설정
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS 파일
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# 테스트 커버리지
-coverage/
-.nyc_output/
-
-# 임시 파일
-tmp/
-temp/
-*.tmp
+# Vercel
+.vercel
 
 # PM2
 .pm2/
 
+# Test coverage
+coverage/
+.nyc_output/
+
+# Backup files
+*.backup_*
