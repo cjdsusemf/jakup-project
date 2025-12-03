@@ -10,6 +10,16 @@ import { getWorkLogs, deleteWorkLog, updateWorkLog } from '../../api/foreman';
 import { useSiteStore } from '../../store/siteStore';
 import { StyledTextarea } from '../../components/common/StyledInput';
 
+// 공수 포맷팅: 정수면 정수로, 소수면 소수로 (예: 2.0 → 2, 2.5 → 2.5)
+const formatEffort = (effort: number): string => {
+  return effort % 1 === 0 ? effort.toString() : effort.toFixed(1).replace(/\.0$/, '');
+};
+
+// 금액 포맷팅: 정수로 변환 후 천 단위 구분 (예: 250000.00 → 250,000)
+const formatAmount = (amount: number): string => {
+  return Math.round(amount).toLocaleString();
+};
+
 interface WorkLog {
   id: number;
   workDate: string;
@@ -367,11 +377,11 @@ const WorkLogListPage: React.FC = () => {
                     <CardBody>
                       <InfoRow>
                         <InfoLabel>총 공수</InfoLabel>
-                        <InfoValue>{grouped.totalEffort}공수</InfoValue>
+                        <InfoValue>{formatEffort(grouped.totalEffort)}공수</InfoValue>
                       </InfoRow>
                       <InfoRow>
                         <InfoLabel>총 금액</InfoLabel>
-                        <InfoValue $highlight>{grouped.totalAmount.toLocaleString()}원</InfoValue>
+                        <InfoValue $highlight>{formatAmount(grouped.totalAmount)}원</InfoValue>
                       </InfoRow>
                       <InfoRow>
                         <InfoLabel>작업내용</InfoLabel>
@@ -454,7 +464,7 @@ const WorkLogListPage: React.FC = () => {
                                         <EditInputWrapper>
                                           <EditWorkerInput
                                             type="text"
-                                            value={dailyRate.toLocaleString()}
+                                            value={formatAmount(dailyRate)}
                                             readOnly
                                             disabled
                                           />
@@ -464,7 +474,7 @@ const WorkLogListPage: React.FC = () => {
                                     </EditInputRow>
                                     <EditAmountRow>
                                       <EditAmountLabel>💰 합계</EditAmountLabel>
-                                      <EditAmountDisplay>{amount.toLocaleString()}원</EditAmountDisplay>
+                                      <EditAmountDisplay>{formatAmount(amount)}원</EditAmountDisplay>
                                     </EditAmountRow>
                                   </EditWorkerCardBody>
                                 </EditWorkerCard>
@@ -475,11 +485,11 @@ const WorkLogListPage: React.FC = () => {
                           <EditTotalAmountSection>
                             <EditTotalAmountLabel>총 금액</EditTotalAmountLabel>
                             <EditTotalAmountValue>
-                              {editEfforts.reduce((total, editData) => {
+                              {formatAmount(editEfforts.reduce((total, editData) => {
                                 const log = selectedWorkLog.workLogs.find(l => l.id === editData.id);
                                 const dailyRate = log?.dailyRate ?? log?.worker?.dailyRate ?? 0;
                                 return total + (editData.effort * dailyRate);
-                              }, 0).toLocaleString()}원
+                              }, 0))}원
                             </EditTotalAmountValue>
                           </EditTotalAmountSection>
                         </DetailSection>
@@ -529,18 +539,18 @@ const WorkLogListPage: React.FC = () => {
                                   <WorkerInfo>
                                     <WorkerDetail>
                                       <WorkerDetailLabel>공수</WorkerDetailLabel>
-                                      <WorkerDetailValue>{log.effort}공수</WorkerDetailValue>
+                                      <WorkerDetailValue>{formatEffort(log.effort)}공수</WorkerDetailValue>
                                     </WorkerDetail>
                                     <WorkerDetail>
                                       <WorkerDetailLabel>단가</WorkerDetailLabel>
                                       <WorkerDetailValue>
-                                        {dailyRate.toLocaleString()}원
+                                        {formatAmount(dailyRate)}원
                                       </WorkerDetailValue>
                                     </WorkerDetail>
                                     <WorkerDetail>
                                       <WorkerDetailLabel>금액</WorkerDetailLabel>
                                       <WorkerDetailValue $highlight>
-                                        {(log.effort * dailyRate).toLocaleString()}원
+                                        {formatAmount(log.effort * dailyRate)}원
                                       </WorkerDetailValue>
                                     </WorkerDetail>
                                   </WorkerInfo>
@@ -563,12 +573,12 @@ const WorkLogListPage: React.FC = () => {
                         <TotalSummary>
                           <SummaryRow>
                             <SummaryLabel>총 공수</SummaryLabel>
-                            <SummaryValue>{selectedWorkLog.totalEffort}공수</SummaryValue>
+                            <SummaryValue>{formatEffort(selectedWorkLog.totalEffort)}공수</SummaryValue>
                           </SummaryRow>
                           <SummaryRow>
                             <SummaryLabel>총 금액</SummaryLabel>
                             <SummaryValue $highlight>
-                              {selectedWorkLog.totalAmount.toLocaleString()}원
+                              {formatAmount(selectedWorkLog.totalAmount)}원
                             </SummaryValue>
                           </SummaryRow>
                         </TotalSummary>

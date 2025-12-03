@@ -4,6 +4,16 @@ import { theme } from '../../styles/theme';
 import { getAllWorkLogs, getSites, WorkLog, Site, markWorkLogsAsPaid } from '../../api/admin';
 import { StyledSelect } from '../../components/common/StyledInput';
 
+// 공수 포맷팅: 정수면 정수로, 소수면 소수로 (예: 2.0 → 2, 2.5 → 2.5)
+const formatEffort = (effort: number): string => {
+  return effort % 1 === 0 ? effort.toString() : effort.toFixed(1).replace(/\.0$/, '');
+};
+
+// 금액 포맷팅: 정수로 변환 후 천 단위 구분 (예: 250000.00 → 250,000)
+const formatAmount = (amount: number): string => {
+  return Math.round(amount).toLocaleString();
+};
+
 interface GroupedWorkLog {
   date: string;
   siteId: number;
@@ -303,15 +313,15 @@ const AllWorkLogsPage: React.FC = () => {
                             <WorkerDetailBody>
                               <WorkerDetailRow>
                                 <WorkerDetailLabel>공수:</WorkerDetailLabel>
-                                <WorkerDetailValue>{effort}공수</WorkerDetailValue>
+                                <WorkerDetailValue>{formatEffort(effort)}공수</WorkerDetailValue>
                               </WorkerDetailRow>
                               <WorkerDetailRow>
                                 <WorkerDetailLabel>단가:</WorkerDetailLabel>
-                                <WorkerDetailValue>{dailyRate.toLocaleString()}원</WorkerDetailValue>
+                                <WorkerDetailValue>{formatAmount(dailyRate)}원</WorkerDetailValue>
                               </WorkerDetailRow>
                               <WorkerDetailRow>
                                 <WorkerDetailLabel>금액:</WorkerDetailLabel>
-                                <WorkerDetailValue $highlight>{amount.toLocaleString()}원</WorkerDetailValue>
+                                <WorkerDetailValue $highlight>{formatAmount(amount)}원</WorkerDetailValue>
                               </WorkerDetailRow>
                             </WorkerDetailBody>
                           </WorkerDetailCard>
@@ -321,11 +331,11 @@ const AllWorkLogsPage: React.FC = () => {
                       <TotalSummary>
                         <TotalRow>
                           <TotalLabel>총 공수:</TotalLabel>
-                          <TotalValue>{totalEffort}공수</TotalValue>
+                          <TotalValue>{formatEffort(totalEffort)}공수</TotalValue>
                         </TotalRow>
                         <TotalRow>
                           <TotalLabel>총 금액:</TotalLabel>
-                          <TotalValue $highlight>{totalAmount.toLocaleString()}원</TotalValue>
+                          <TotalValue $highlight>{formatAmount(totalAmount)}원</TotalValue>
                         </TotalRow>
                       </TotalSummary>
                     </>

@@ -12,6 +12,16 @@ import {
 import { getWorkersBySite } from '../../api/foreman';
 import { StyledSelect } from '../../components/common/StyledInput';
 
+// 공수 포맷팅: 정수면 정수로, 소수면 소수로 (예: 2.0 → 2, 2.5 → 2.5)
+const formatEffort = (effort: number): string => {
+  return effort % 1 === 0 ? effort.toString() : effort.toFixed(1).replace(/\.0$/, '');
+};
+
+// 금액 포맷팅: 정수로 변환 후 천 단위 구분 (예: 250000.00 → 250,000)
+const formatAmount = (amount: number): string => {
+  return Math.round(amount).toLocaleString();
+};
+
 interface GroupedWorkLog {
   type: 'worklog';
   date: string;
@@ -252,7 +262,7 @@ const AggregationPage: React.FC = () => {
               <CardIcon>💰</CardIcon>
               <CardContent>
                 <CardLabel>총 금액</CardLabel>
-                <CardValue $color="#667eea">{aggregationData.summary.totalAmount.toLocaleString()}원</CardValue>
+                <CardValue $color="#667eea">{formatAmount(aggregationData.summary.totalAmount)}원</CardValue>
                 <CardSubtext>{aggregationData.summary.totalCount}건</CardSubtext>
               </CardContent>
             </SummaryCard>
@@ -261,7 +271,7 @@ const AggregationPage: React.FC = () => {
               <CardIcon>📋</CardIcon>
               <CardContent>
                 <CardLabel>작업일지</CardLabel>
-                <CardValue $color="#2196f3">{aggregationData.summary.workLogAmount.toLocaleString()}원</CardValue>
+                <CardValue $color="#2196f3">{formatAmount(aggregationData.summary.workLogAmount)}원</CardValue>
                 <CardSubtext>{aggregationData.summary.workLogCount}건</CardSubtext>
               </CardContent>
             </SummaryCard>
@@ -270,7 +280,7 @@ const AggregationPage: React.FC = () => {
               <CardIcon>💸</CardIcon>
               <CardContent>
                 <CardLabel>지출결의</CardLabel>
-                <CardValue $color="#f57c00">{aggregationData.summary.expenseAmount.toLocaleString()}원</CardValue>
+                <CardValue $color="#f57c00">{formatAmount(aggregationData.summary.expenseAmount)}원</CardValue>
                 <CardSubtext>{aggregationData.summary.expenseCount}건</CardSubtext>
               </CardContent>
             </SummaryCard>
@@ -279,7 +289,7 @@ const AggregationPage: React.FC = () => {
               <CardIcon>✅</CardIcon>
               <CardContent>
                 <CardLabel>지급완료</CardLabel>
-                <CardValue $color="#4caf50">{aggregationData.summary.paidAmount.toLocaleString()}원</CardValue>
+                <CardValue $color="#4caf50">{formatAmount(aggregationData.summary.paidAmount)}원</CardValue>
               </CardContent>
             </SummaryCard>
 
@@ -287,7 +297,7 @@ const AggregationPage: React.FC = () => {
               <CardIcon>⏳</CardIcon>
               <CardContent>
                 <CardLabel>미지급</CardLabel>
-                <CardValue $color="#ff9800">{aggregationData.summary.unpaidAmount.toLocaleString()}원</CardValue>
+                <CardValue $color="#ff9800">{formatAmount(aggregationData.summary.unpaidAmount)}원</CardValue>
               </CardContent>
             </SummaryCard>
           </SummarySection>
@@ -340,12 +350,12 @@ const AggregationPage: React.FC = () => {
                         </Td>
                         <Td>
                           {item.type === 'worklog'
-                            ? `${item.totalEffort || 0}공수`
+                            ? `${formatEffort(item.totalEffort || 0)}공수`
                             : (item.content || '-')
                           }
                         </Td>
                         <Td>
-                          <AmountText>{(item.totalAmount || item.amount || 0).toLocaleString()}원</AmountText>
+                          <AmountText>{formatAmount(item.totalAmount || item.amount || 0)}원</AmountText>
                         </Td>
                         <Td>
                           <StatusBadge $status={item.paymentStatus || item.status}>
@@ -413,15 +423,15 @@ const AggregationPage: React.FC = () => {
                         <WorkerDetailBody>
                           <WorkerDetailRow>
                             <WorkerDetailLabel>공수:</WorkerDetailLabel>
-                            <WorkerDetailValue>{item.effort || 0}공수</WorkerDetailValue>
+                            <WorkerDetailValue>{formatEffort(item.effort || 0)}공수</WorkerDetailValue>
                           </WorkerDetailRow>
                           <WorkerDetailRow>
                             <WorkerDetailLabel>단가:</WorkerDetailLabel>
-                            <WorkerDetailValue>{(item.dailyRate || 0).toLocaleString()}원</WorkerDetailValue>
+                            <WorkerDetailValue>{formatAmount(item.dailyRate || 0)}원</WorkerDetailValue>
                           </WorkerDetailRow>
                           <WorkerDetailRow>
                             <WorkerDetailLabel>금액:</WorkerDetailLabel>
-                            <WorkerDetailValue $highlight>{(item.amount || 0).toLocaleString()}원</WorkerDetailValue>
+                            <WorkerDetailValue $highlight>{formatAmount(item.amount || 0)}원</WorkerDetailValue>
                           </WorkerDetailRow>
                         </WorkerDetailBody>
                       </WorkerDetailCard>
@@ -430,11 +440,11 @@ const AggregationPage: React.FC = () => {
                     <TotalSummary>
                       <TotalRow>
                         <TotalLabel>총 공수:</TotalLabel>
-                        <TotalValue>{selectedItem.totalEffort || 0}공수</TotalValue>
+                        <TotalValue>{formatEffort(selectedItem.totalEffort || 0)}공수</TotalValue>
                       </TotalRow>
                       <TotalRow>
                         <TotalLabel>총 금액:</TotalLabel>
-                        <TotalValue $highlight>{(selectedItem.totalAmount || 0).toLocaleString()}원</TotalValue>
+                        <TotalValue $highlight>{formatAmount(selectedItem.totalAmount || 0)}원</TotalValue>
                       </TotalRow>
                     </TotalSummary>
                   </WorkerDetailList>
