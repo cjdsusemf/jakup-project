@@ -1,23 +1,17 @@
 import axios from 'axios';
 
 // API URL 설정
-// 프로덕션: 상대 경로 사용 (Vercel 배포 시)
-// 개발: localhost 사용
-const getBaseURL = () => {
-  // 프로덕션 환경 (vercel.app 도메인)
-  if (window.location.hostname.includes('vercel.app')) {
-    return '/api';
-  }
-  // 환경 변수가 설정된 경우
-  if (process.env.REACT_APP_API_URL) {
-    return process.env.REACT_APP_API_URL;
-  }
-  // 개발 환경 기본값
-  return 'http://localhost:3001/api';
-};
+// localhost가 아니면 상대 경로 사용 (프로덕션)
+// localhost면 절대 경로 사용 (개발)
+const API_BASE_URL = window.location.hostname === 'localhost'
+  ? 'http://localhost:3001/api'
+  : '/api';
+
+console.log('🚀 API Base URL:', API_BASE_URL);
+console.log('🌍 Current hostname:', window.location.hostname);
 
 const axiosInstance = axios.create({
-  baseURL: getBaseURL(),
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
