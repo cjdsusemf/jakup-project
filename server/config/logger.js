@@ -47,26 +47,33 @@ const fileFormat = winston.format.combine(
 
 // 트랜스포트 설정
 const transports = [
-  // 콘솔 출력
+  // 콘솔 출력 (모든 환경)
   new winston.transports.Console({
     format: format
-  }),
-  // 에러 로그 파일
-  new winston.transports.File({
-    filename: path.join(__dirname, '../logs/error.log'),
-    level: 'error',
-    format: fileFormat,
-    maxsize: 5242880, // 5MB
-    maxFiles: 5
-  }),
-  // 모든 로그 파일
-  new winston.transports.File({
-    filename: path.join(__dirname, '../logs/all.log'),
-    format: fileFormat,
-    maxsize: 5242880, // 5MB
-    maxFiles: 5
   })
 ];
+
+// Vercel Serverless 환경이 아닌 경우에만 파일 로깅 추가
+// Vercel은 read-only 파일 시스템이므로 파일 로깅 불가
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'production') {
+  transports.push(
+    // 에러 로그 파일
+    new winston.transports.File({
+      filename: path.join(__dirname, '../logs/error.log'),
+      level: 'error',
+      format: fileFormat,
+      maxsize: 5242880, // 5MB
+      maxFiles: 5
+    }),
+    // 모든 로그 파일
+    new winston.transports.File({
+      filename: path.join(__dirname, '../logs/all.log'),
+      format: fileFormat,
+      maxsize: 5242880, // 5MB
+      maxFiles: 5
+    })
+  );
+}
 
 // Logger 생성
 const logger = winston.createLogger({
